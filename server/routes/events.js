@@ -5,21 +5,35 @@ const verifyToken = require("../middleware/verifyToken");
 
 // Create new event (admin or coordinator)
 router.post("/create", verifyToken, async (req, res) => {
-    const { title, category, description, date } = req.body;
-    const userId = req.user.id; // from JWT
+    const {
+      title,
+      category,
+      description,
+      date,
+      prizes,
+      brochure_url,
+      image_url,
+      registration_fee
+    } = req.body;
+  
+    const userId = req.user.id;
   
     try {
       const result = await db.query(
-        "INSERT INTO events (title, category, description, date, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [title, category, description, date, userId]
+        `INSERT INTO events
+        (title, category, description, date, created_by, is_verified, created_at, prizes, brochure_url, image_url, registration_fee)
+        VALUES ($1, $2, $3, $4, $5, false, NOW(), $6, $7, $8, $9)
+        RETURNING *`,
+        [title, category, description, date, userId, prizes, brochure_url, image_url, registration_fee]
       );
+  
       res.status(201).json(result.rows[0]);
     } catch (err) {
       console.error("Error creating event:", err.message);
-      res.status(500).json({ error: "Server error" });
+      res.status(500).json({ message: "Event creation failed" });
     }
   });
-
+  
 
 // ✅ Register for an event
 router.post("/register", verifyToken, async (req, res) => {
@@ -68,11 +82,19 @@ router.get("/my-registrations", verifyToken, async (req, res) => {
 
 router.get("/", async (req, res) => {
     try {
-      const events = await db.query("SELECT id, name, category FROM events WHERE is_verified = true");
+      const events = await db.query(`
+        SELECT 
+          id, title, category, description, date,
+          prizes, brochure_url, image_url, registration_fee
+        FROM events
+        WHERE is_verified = true
+        ORDER BY date ASC
+      `);
+  
       res.json(events.rows);
     } catch (err) {
+      console.error("Error fetching events:", err.message);
       res.status(500).json({ message: "Failed to load events" });
     }
   });
-
 module.exports = router;

@@ -27,19 +27,39 @@ router.post('/register', async (req, res) => {
 
 // POST /login
 router.post("/login", async (req, res) => {
-    const { email, password } = req.body
-    const user = await db.query("SELECT * FROM users WHERE email = $1", [email])
-    if (!user.rows.length) {
-      return res.status(400).json({ message: "Invalid credentials" })
-    }
+    try {
+      const { email, password } = req.body;
+      const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
   
-    const match = await bcrypt.compare(password, user.rows[0].password)
-    if (!match) {
-      return res.status(400).json({ message: "Invalid credentials" })
-    }
+      if (!user.rows.length) {
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
   
-    // Only return safe user object
-    res.json({ user: { id: user.rows[0].id, email: user.rows[0].email, role: user.rows[0].role } })
-  })
+      const match = await bcrypt.compare(password, user.rows[0].password);
+      if (!match) {
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
+  
+      const safeUser = {
+        id: user.rows[0].id,
+        name: user.rows[0].name,
+        email: user.rows[0].email,
+        role: user.rows[0].role,
+      };
+  
+      const token = jwt.sign(
+        { id: safeUser.id, role: safeUser.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+      );
+  
+      res.json({ user: safeUser, token });
+  
+    } catch (err) {
+      console.error("Login Error:", err.message);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
 
 module.exports = router;

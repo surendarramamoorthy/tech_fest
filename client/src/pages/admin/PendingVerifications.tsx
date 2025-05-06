@@ -1,27 +1,65 @@
-// src/pages/admin/PendingVerifications.tsx
-import { useState } from "react"
-import VerificationTable from "../../components/VerificationTable"
+import { useEffect, useState } from 'react';
+import VerificationTable from '../../components/VerificationTable';
+import {
+  fetchPendingVerifications,
+  approveUser,
+  rejectUser,
+  approveEvent,
+  rejectEvent,
+} from '../../services/adminService';
 
 export default function PendingVerifications() {
-  const [pending, setPending] = useState([
-    { id: 1, name: "Suresh Kumar", email: "suresh@mail.com", type: "user" },
-    { id: 2, name: "Hackathon 2.0", eventName: "Hackathon", type: "event" }
-  ])
+  const [users, setUsers] = useState([]);
+  const [events, setEvents] = useState([]);
 
-  const handleApprove = (id: number) => {
-    setPending(pending.filter(item => item.id !== id))
-    // TODO: Call backend API to mark as approved
-  }
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchPendingVerifications();
+        setUsers(data.users);
+        setEvents(data.events);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadData();
+  }, []);
 
-  const handleReject = (id: number) => {
-    setPending(pending.filter(item => item.id !== id))
-    // TODO: Call backend API to delete or reject
-  }
+  const handleApproveUser = async (id: number) => {
+    await approveUser(id);
+    setUsers(users.filter(u => u.id !== id));
+  };
+
+  const handleRejectUser = async (id: number) => {
+    await rejectUser(id);
+    setUsers(users.filter(u => u.id !== id));
+  };
+
+  const handleApproveEvent = async (id: number) => {
+    await approveEvent(id);
+    setEvents(events.filter(e => e.id !== id));
+  };
+
+  const handleRejectEvent = async (id: number) => {
+    await rejectEvent(id);
+    setEvents(events.filter(e => e.id !== id));
+  };
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4">🕵️ Pending Verifications</h2>
-      <VerificationTable data={pending} onApprove={handleApprove} onReject={handleReject} />
+      <h2 className="text-2xl font-bold mb-4">🕵️ User Verifications</h2>
+      <VerificationTable
+        data={users.map(user => ({ ...user, type: 'user' }))}
+        onApprove={handleApproveUser}
+        onReject={handleRejectUser}
+      />
+
+      <h2 className="text-2xl font-bold mt-8 mb-4">📝 Event Verifications</h2>
+      <VerificationTable
+        data={events.map(event => ({ ...event, type: 'event', name: event.name, eventName: event.category }))}
+        onApprove={handleApproveEvent}
+        onReject={handleRejectEvent}
+      />
     </div>
-  )
+  );
 }

@@ -14,6 +14,20 @@ import UserDashboard from "../pages/UserDashboard"
 
 import ProtectedRoute from "../components/ProtectedRoute"
 
+import AdminLayout from "../layouts/AdminLayout"
+import Overview from "../pages/admin/Overview"
+import Users from "../pages/admin/Users"
+
+import EventLayout from "../layouts/EventLayout"
+import EventOverview from "../pages/event/Overview"
+import Submissions from "../pages/event/Submissions"
+
+import FinanceLayout from "../layouts/FinanceLayout"
+import FinanceOverview from "../pages/finance/Overview"
+import Transactions from "../pages/finance/Transactions"
+
+import PendingVerifications from "../pages/admin/PendingVerifications"
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -56,6 +70,54 @@ export default function AppRoutes() {
           }
         />
       </Route>
+        <Route
+            path="admin"
+            element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminLayout />
+                </ProtectedRoute>
+            }
+            >
+            <Route index element={<Overview />} />
+            <Route path="users" element={<Users />} />
+        </Route>
+        <Route
+            path="event-dashboard"
+            element={
+                <ProtectedRoute allowedRoles={["event_coordinator"]}>
+                <EventLayout />
+                </ProtectedRoute>
+            }
+            >
+            <Route index element={<EventOverview />} />
+            <Route path="submissions" element={<Submissions />} />
+        </Route>
+        <Route
+            path="finance-dashboard"
+            element={
+                <ProtectedRoute allowedRoles={["finance_coordinator"]}>
+                <FinanceLayout />
+                </ProtectedRoute>
+            }
+            >
+            <Route index element={<FinanceOverview />} />
+            <Route path="transactions" element={<Transactions />} />
+        </Route>
+
+        <Route
+            path="admin"
+            element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminLayout />
+                </ProtectedRoute>
+            }
+            >
+            <Route index element={<Overview />} />
+            <Route path="users" element={<Users />} />
+            <Route path="verifications" element={<PendingVerifications />} />
+        </Route>
+
+
     </Routes>
   )
 }

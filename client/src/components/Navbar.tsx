@@ -1,16 +1,18 @@
-import { useUser } from "../context/UserContext";
-import { useNavigate, Link } from "react-router-dom";
-import { logoutUser } from "../services/authService";
+// src/components/Navbar.tsx
+
+import { useUser } from "../context/UserContext"
+import { useNavigate, Link } from "react-router-dom"
+import { logoutUser } from "../services/authService"
 
 export default function Navbar() {
-  const { user, setUser } = useUser();
-  const navigate = useNavigate();
+  const { user, setUser } = useUser()
+  const navigate = useNavigate()
 
   const handleLogout = () => {
-    logoutUser();
-    setUser(null);
-    navigate("/");
-  };
+    logoutUser()
+    setUser(null)
+    navigate("/")
+  }
 
   return (
     <nav className="bg-gray-900 text-white px-6 py-4 flex justify-between items-center">
@@ -23,26 +25,26 @@ export default function Navbar() {
             {/* 🔒 Admin-only links */}
             {user.role === "admin" && (
               <>
-                <Link to="/admin/dashboard" className="hover:underline">
+                <Link to="/admin" className="hover:underline">
                   Dashboard
                 </Link>
-                <Link to="/admin/manage-users" className="hover:underline">
+                <Link to="/admin/users" className="hover:underline">
                   Manage Users
                 </Link>
-                <Link to="/admin/pending-approvals" className="hover:underline">
+                <Link to="/admin/verifications" className="hover:underline">
                   Pending Approvals
                 </Link>
               </>
             )}
 
-            {/* Admin + Event Coordinator */}
+            {/* 👨‍💼 Event Coordinator or Admin */}
             {["admin", "event_coordinator"].includes(user.role) && (
               <Link to="/create-event" className="hover:underline">
                 Add Event
               </Link>
             )}
 
-            {/* General users */}
+            {/* 👥 General or any logged-in user */}
             <Link to="/events" className="hover:underline">
               Events
             </Link>
@@ -50,7 +52,7 @@ export default function Navbar() {
               My Events
             </Link>
 
-            {/* Common */}
+            {/* ✅ Common */}
             <span>Welcome, {user.email}</span>
             <button
               onClick={handleLogout}
@@ -71,5 +73,5 @@ export default function Navbar() {
         )}
       </div>
     </nav>
-  );
+  )
 }

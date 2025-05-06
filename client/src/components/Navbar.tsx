@@ -1,28 +1,42 @@
-// src/components/Navbar.tsx
-import { Link } from "react-router-dom";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../context/UserContext"
+import { useNavigate } from "react-router-dom"
+import { logoutUser } from "../services/authService"
 
-function Navbar() {
-  const { user, logout } = useUser();
+export default function Navbar() {
+  const { user, setUser } = useUser()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logoutUser()
+    setUser(null)
+    navigate("/")
+  }
 
   return (
-    <nav className="bg-blue-600 text-white px-4 py-2 flex justify-between items-center">
-      <h1 className="text-xl font-bold">TechFest</h1>
-      <div className="flex items-center gap-4">
-        <Link to="/">Home</Link>
-        <Link to="/events">Events</Link>
-        {user && user.role === "admin" && <Link to="/dashboard">Admin</Link>}
-        {user && user.role === "event_coordinator" && <Link to="/dashboard">Coordinator</Link>}
-        {!user ? (
-          <Link to="/login">Login</Link>
+    <nav className="bg-gray-900 text-white px-6 py-4 flex justify-between">
+      <div className="font-bold text-lg">YUVA'25</div>
+      <div className="space-x-4">
+        {user ? (
+          <>
+            <span>Welcome, {user.email}</span>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
+            >
+              Logout
+            </button>
+          </>
         ) : (
-          <button onClick={logout} className="bg-red-600 px-2 py-1 rounded">
-            Logout
-          </button>
+          <>
+            <a href="/login" className="hover:underline">
+              Login
+            </a>
+            <a href="/register" className="hover:underline">
+              Register
+            </a>
+          </>
         )}
       </div>
     </nav>
-  );
+  )
 }
-
-export default Navbar;

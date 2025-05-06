@@ -26,21 +26,20 @@ router.post('/register', async (req, res) => {
   
 
 // POST /login
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const result = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
-    const user = result.rows[0];
-    if (!user) return res.status(401).json({ error: "User not found" });
-
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) return res.status(401).json({ error: "Invalid password" });
-
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.post("/login", async (req, res) => {
+    const { email, password } = req.body
+    const user = await db.query("SELECT * FROM users WHERE email = $1", [email])
+    if (!user.rows.length) {
+      return res.status(400).json({ message: "Invalid credentials" })
+    }
+  
+    const match = await bcrypt.compare(password, user.rows[0].password)
+    if (!match) {
+      return res.status(400).json({ message: "Invalid credentials" })
+    }
+  
+    // Only return safe user object
+    res.json({ user: { id: user.rows[0].id, email: user.rows[0].email, role: user.rows[0].role } })
+  })
 
 module.exports = router;

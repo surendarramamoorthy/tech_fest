@@ -1,24 +1,21 @@
-// client/src/services/authService.ts
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "http://localhost:5000/api"
 
-export const login = async (email: string, password: string) => {
-  const res = await fetch(`${API_URL}/login`, {
+export async function loginUser(credentials: { email: string; password: string }) {
+  const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
+    body: JSON.stringify(credentials),
+  })
 
-  if (!res.ok) throw new Error("Login failed");
-  return await res.json();
-};
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || "Login failed")
+  }
 
-export const register = async (name: string, email: string, password: string, role?: string) => {
-  const res = await fetch(`${API_URL}/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password, role }),
-  });
+  localStorage.setItem("user", JSON.stringify(data.user))
+  return data.user
+}
 
-  if (!res.ok) throw new Error("Registration failed");
-  return await res.json();
-};
+export function logoutUser() {
+  localStorage.removeItem("user")
+}

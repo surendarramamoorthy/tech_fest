@@ -1,4 +1,3 @@
-// src/routes/AppRoutes.tsx
 import { Routes, Route } from "react-router-dom"
 import App from "../App"
 
@@ -14,37 +13,70 @@ import UserDashboard from "../pages/UserDashboard"
 
 import ProtectedRoute from "../components/ProtectedRoute"
 
-import AdminLayout from "../layouts/AdminLayout"
-import Overview from "../pages/admin/Overview"
+import PendingVerifications from "../pages/admin/PendingVerifications"
 import Users from "../pages/admin/Users"
 
-import EventLayout from "../layouts/EventLayout"
 import EventOverview from "../pages/event/Overview"
 import Submissions from "../pages/event/Submissions"
 
-import FinanceLayout from "../layouts/FinanceLayout"
 import FinanceOverview from "../pages/finance/Overview"
 import Transactions from "../pages/finance/Transactions"
 
-import PendingVerifications from "../pages/admin/PendingVerifications"
+import EventList from "../pages/EventList"
+import MyEvents from "../pages/MyEvents"
+import CreateEvent from "../pages/CreateEvent"
+import { Navigate } from "react-router-dom"
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<App />}>
         <Route index element={<Home />} />
-        <Route path="events" element={<Events />} />
+        <Route path="events" element={<EventList />} />
+
+        <Route
+          path="my-events"
+          element={
+            <ProtectedRoute allowedRoles={["general", "admin", "event_coordinator"]}>
+              <MyEvents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+        path="admin"
+        element={<Navigate to="/admin/dashboard" replace />}
+        />
+
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
 
+        {/* Admin Section */}
         <Route
-          path="admin"
+          path="admin/dashboard"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminDashboard />
             </ProtectedRoute>
           }
         />
+        <Route
+          path="admin/manage-users"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <Users />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/pending-approvals"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <PendingVerifications />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Event Coordinator */}
         <Route
           path="event-dashboard"
           element={
@@ -54,6 +86,24 @@ export default function AppRoutes() {
           }
         />
         <Route
+          path="event-dashboard/overview"
+          element={
+            <ProtectedRoute allowedRoles={["event_coordinator"]}>
+              <EventOverview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="event-dashboard/submissions"
+          element={
+            <ProtectedRoute allowedRoles={["event_coordinator"]}>
+              <Submissions />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Finance Coordinator */}
+        <Route
           path="finance-dashboard"
           element={
             <ProtectedRoute allowedRoles={["finance_coordinator"]}>
@@ -62,62 +112,32 @@ export default function AppRoutes() {
           }
         />
         <Route
-          path="dashboard"
+          path="finance-dashboard/overview"
           element={
-            <ProtectedRoute allowedRoles={["general"]}>
-              <UserDashboard />
+            <ProtectedRoute allowedRoles={["finance_coordinator"]}>
+              <FinanceOverview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="finance-dashboard/transactions"
+          element={
+            <ProtectedRoute allowedRoles={["finance_coordinator"]}>
+              <Transactions />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Create Event */}
+        <Route
+          path="create-event"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "event_coordinator"]}>
+              <CreateEvent />
             </ProtectedRoute>
           }
         />
       </Route>
-        <Route
-            path="admin"
-            element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                <AdminLayout />
-                </ProtectedRoute>
-            }
-            >
-            <Route index element={<Overview />} />
-            <Route path="users" element={<Users />} />
-        </Route>
-        <Route
-            path="event-dashboard"
-            element={
-                <ProtectedRoute allowedRoles={["event_coordinator"]}>
-                <EventLayout />
-                </ProtectedRoute>
-            }
-            >
-            <Route index element={<EventOverview />} />
-            <Route path="submissions" element={<Submissions />} />
-        </Route>
-        <Route
-            path="finance-dashboard"
-            element={
-                <ProtectedRoute allowedRoles={["finance_coordinator"]}>
-                <FinanceLayout />
-                </ProtectedRoute>
-            }
-            >
-            <Route index element={<FinanceOverview />} />
-            <Route path="transactions" element={<Transactions />} />
-        </Route>
-
-        <Route
-            path="admin"
-            element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                <AdminLayout />
-                </ProtectedRoute>
-            }
-            >
-            <Route index element={<Overview />} />
-            <Route path="users" element={<Users />} />
-            <Route path="verifications" element={<PendingVerifications />} />
-        </Route>
-
-
     </Routes>
   )
 }

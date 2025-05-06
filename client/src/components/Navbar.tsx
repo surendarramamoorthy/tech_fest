@@ -1,23 +1,56 @@
-import { useUser } from "../context/UserContext"
-import { useNavigate } from "react-router-dom"
-import { logoutUser } from "../services/authService"
+import { useUser } from "../context/UserContext";
+import { useNavigate, Link } from "react-router-dom";
+import { logoutUser } from "../services/authService";
 
 export default function Navbar() {
-  const { user, setUser } = useUser()
-  const navigate = useNavigate()
+  const { user, setUser } = useUser();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    logoutUser()
-    setUser(null)
-    navigate("/")
-  }
+    logoutUser();
+    setUser(null);
+    navigate("/");
+  };
 
   return (
-    <nav className="bg-gray-900 text-white px-6 py-4 flex justify-between">
-      <div className="font-bold text-lg">YUVA'25</div>
-      <div className="space-x-4">
+    <nav className="bg-gray-900 text-white px-6 py-4 flex justify-between items-center">
+      <div className="font-bold text-lg">
+        <Link to="/">YUVA'25</Link>
+      </div>
+      <div className="space-x-4 flex items-center">
         {user ? (
           <>
+            {/* 🔒 Admin-only links */}
+            {user.role === "admin" && (
+              <>
+                <Link to="/admin/dashboard" className="hover:underline">
+                  Dashboard
+                </Link>
+                <Link to="/admin/manage-users" className="hover:underline">
+                  Manage Users
+                </Link>
+                <Link to="/admin/pending-approvals" className="hover:underline">
+                  Pending Approvals
+                </Link>
+              </>
+            )}
+
+            {/* Admin + Event Coordinator */}
+            {["admin", "event_coordinator"].includes(user.role) && (
+              <Link to="/create-event" className="hover:underline">
+                Add Event
+              </Link>
+            )}
+
+            {/* General users */}
+            <Link to="/events" className="hover:underline">
+              Events
+            </Link>
+            <Link to="/my-events" className="hover:underline">
+              My Events
+            </Link>
+
+            {/* Common */}
             <span>Welcome, {user.email}</span>
             <button
               onClick={handleLogout}
@@ -28,15 +61,15 @@ export default function Navbar() {
           </>
         ) : (
           <>
-            <a href="/login" className="hover:underline">
+            <Link to="/login" className="hover:underline">
               Login
-            </a>
-            <a href="/register" className="hover:underline">
+            </Link>
+            <Link to="/register" className="hover:underline">
               Register
-            </a>
+            </Link>
           </>
         )}
       </div>
     </nav>
-  )
+  );
 }
